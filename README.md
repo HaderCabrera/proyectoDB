@@ -142,13 +142,19 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
 
 1. Obtener el costo total de piezas utilizadas en una reparación específica
     ```sql
-        SELECT (SUM(RR.precio) * PR.cantidad) AS 'valor', PR.reparacion_id AS reparacionID
+        SELECT repa.reparacionID AS 'reparacionID' ,SUM(repa.valor) AS 'Valor de la reparacion'
+        FROM (SELECT (SUM(RR.precio) * PR.cantidad) AS 'valor', PR.reparacion_id AS reparacionID, PR.cantidad AS 'cantidad'
         FROM pieza_reparacion AS PR
         INNER JOIN repuesto AS RR ON PR.repuesto_id = RR.id_repuesto
-        GROUP BY(PR.reparacion_id);
+        GROUP BY PR.reparacion_id, PR.cantidad) AS repa
+        GROUP BY repa.reparacionID;
+
 
     ```
     ```
-
+        SELECT PR.reparacion_id AS reparacionID
+        FROM pieza_reparacion AS PR
+        INNER JOIN repuesto AS RR ON PR.repuesto_id = RR.id_repuesto
+        GROUP BY PR.reparacion_id, PR.cantidad;
     ```
     **Explicaciòn:** Relaciono las entidades *orden_compra* y *orden_detalle* y extraigo los datos que necesito de cada tabla.
