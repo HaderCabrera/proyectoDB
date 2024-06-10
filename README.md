@@ -7,7 +7,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
 ## Modelo relacional.
 ![](./img/modelo_relacional.png)
 
-## Consultas requeridad.
+## Consultas requeridas
 1. Obtener el historial de reparaciones de un vehículo específico.
     ```sql
         SELECT *
@@ -142,19 +142,331 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
 
 1. Obtener el costo total de piezas utilizadas en una reparación específica
     ```sql
-        SELECT repa.reparacionID AS 'reparacionID' ,SUM(repa.valor) AS 'Valor de la reparacion'
-        FROM (SELECT (SUM(RR.precio) * PR.cantidad) AS 'valor', PR.reparacion_id AS reparacionID, PR.cantidad AS 'cantidad'
+        SELECT PR.reparacion_id AS 'reparacionID',
+            SUM(RR.precio * PR.cantidad) AS 'valor'
         FROM pieza_reparacion AS PR
         INNER JOIN repuesto AS RR ON PR.repuesto_id = RR.id_repuesto
-        GROUP BY PR.reparacion_id, PR.cantidad) AS repa
-        GROUP BY repa.reparacionID;
+        WHERE PR.reparacion_id = 1
+        GROUP BY PR.reparacion_id;
+
+    ```
+    ```
+        +--------------+-----------+
+        | reparacionID | valor     |
+        +--------------+-----------+
+        |            1 | 650000.00 |
+        +--------------+-----------+
+    ```
+    **Explicaciòn:** Relacion las entidades *pieza_reparacion* y *repuesto* poniendo como restriccion un reparacion en especifico, despues hago un *GROUP BY* de esta reparacion y calculo el valor total multiplicando cada pieza por su valor y cantidad.
+
+1. Obtener el inventario de piezas que necesitan ser reabastecidas (cantidad menor que un umbral)
+    ```sql
+        SELECT *
+        FROM inventario as IV
+        WHERE IV.cantidad <= 15;
+    ```
+    ```
+        +---------------+----------+-------------+--------------+
+        | id_inventario | cantidad | repuesto_id | ubicacion_id |
+        +---------------+----------+-------------+--------------+
+        |             1 |       10 |           1 |            1 |
+        |             3 |       15 |           3 |            3 |
+        +---------------+----------+-------------+--------------+
+    ```
+    **Explicaciòn:** Recorro toda la entidad *inventario* buscando los repuestos que tienen menos de 15 existencias.
 
 
+1. Obtener la lista de servicios más solicitados en un período específico
+    ```sql
+        SELECT SE.servicio AS 'Servicio', SUM(id_servicio) AS 'Cantidad'
+        FROM reparacion AS RE
+        INNER JOIN servicio AS SE ON RE.servicio_id = SE.id_servicio
+        WHERE fecha BETWEEN '2019-01-01' AND '2020-01-01'
+        GROUP BY SE.id_servicio;
     ```
     ```
-        SELECT PR.reparacion_id AS reparacionID
-        FROM pieza_reparacion AS PR
-        INNER JOIN repuesto AS RR ON PR.repuesto_id = RR.id_repuesto
-        GROUP BY PR.reparacion_id, PR.cantidad;
+        +---------------------+----------+
+        | Servicio            | Cantidad |
+        +---------------------+----------+
+        | Revisión de Frenos  |        3 |
+        +---------------------+----------+
     ```
-    **Explicaciòn:** Relaciono las entidades *orden_compra* y *orden_detalle* y extraigo los datos que necesito de cada tabla.
+    **Explicaciòn:** Relaciono las entidades *reparacion* y *servicio* luego hago un *GROUP BY* por cada servicio y extraigo la cantidad de servicios en una determinada fecha.
+
+
+1. Obtener el costo total de reparaciones para cada cliente en un período específico
+    ```sql
+        SELECT CL.nombre AS 'Cliente', SUM(RE.costo_total) AS 'Total en reparaciones [COP]'
+        FROM reparacion AS RE
+        INNER JOIN vehiculo AS VH ON RE.vehiculo_id = VH.id_vehiculo
+        INNER JOIN cliente AS CL ON VH.cliente_id = CL.id_cliente
+        GROUP BY CL.id_cliente;
+    ```
+    ```
+        +---------+-----------------------------+
+        | Cliente | Total en reparaciones [COP] |
+        +---------+-----------------------------+
+        | Juan    |                   200000.00 |
+        | María   |                   250000.00 |
+        | Pedro   |                   150000.00 |
+        | Ana     |                   300000.00 |
+        | Luis    |                   200000.00 |
+        | Laura   |                   150000.00 |
+        | Carlos  |                   200000.00 |
+        | Sofía   |                   250000.00 |
+        +---------+-----------------------------+
+    ```
+    **Explicaciòn:** En mi base de datos no tengo relacion directa entre *reparacion* y *cliente* por lo tanto hago dos *JOIN*, luego de tener las reparaciones de los clientes agrupo por cliente y hago una suma total para cada cliente.
+
+1. Listar los empleados con mayor cantidad de reparaciones realizadas en un período específico
+    ```sql
+        SELECT CONCAT(EP.nombre, ' ', EP.apellido) AS 'Empleado', SUM(id_empleado) AS 'Reparaciones'
+        FROM reparacion AS RE
+        INNER JOIN empleado AS EP ON RE.empleado_id = EP.id_empleado
+        WHERE RE.fecha BETWEEN '2018-01-01' AND '2022-01-01'
+        GROUP BY EP.id_empleado
+        ORDER BY Reparaciones desc;
+    ```
+    ```
+        +-----------------+--------------+
+        | Empleado        | Reparaciones |
+        +-----------------+--------------+
+        | María López     |            4 |
+        | Pedro González  |            3 |
+        | Juan Pérez      |            1 |
+        +-----------------+--------------+
+    ```
+    **Explicaciòn:** Relaciono las entiedades *reparacion* y *empleado* y extraigo los registros de un periodo en especifico, luego agrupo por empleado y sumo la cantidad de reparaciones por empleado.
+
+1. Obtener las piezas más utilizadas en reparaciones durante un período específico
+    ```sql
+        SELECT PR.reparacion_id AS Reparacion, RP.repuesto AS Repuesto, SUM(PR.cantidad) AS 'Cantidad'
+        FROM reparacion AS RE
+        INNER JOIN pieza_reparacion AS PR ON RE.id_reparacion = PR.reparacion_id
+        INNER JOIN repuesto AS RP ON PR.repuesto_id = RP.id_repuesto
+        WHERE RE.fecha BETWEEN '2018-01-01' AND '2022-01-01'
+        GROUP BY PR.repuesto_id, PR.reparacion_id
+        ORDER BY Cantidad desc;
+    ```
+    ```
+        +------------+--------------------+----------+
+        | Reparacion | Repuesto           | Cantidad |
+        +------------+--------------------+----------+
+        |          1 | Filtro de Aceite   |        3 |
+        |          1 | Batería            |        2 |
+        |          2 | Llantas            |        2 |
+        |          3 | Espejos Laterales  |        2 |
+        |          2 | Pastillas de Freno |        1 |
+        +------------+--------------------+----------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion* ,*pieza_reparacion* y *repuesto* seleccionando las reparaciones en un periodo en especifico. Luego agrupo por *pieza_reparacion*, y saco la sumatoria total para cada pieza para luego ordenarla desc.
+
+1. Calcular el promedio de costo de reparaciones por vehículo
+    ```sql
+        SELECT AVG(RE.costo_total) AS 'Total en reparaciones', CONCAT(VH.modelo, ' ' , '[',VH.placa, ']') AS 'Vehiculo'
+        FROM reparacion AS RE
+        INNER JOIN vehiculo AS VH ON RE.vehiculo_id = VH.id_vehiculo
+        GROUP BY RE.vehiculo_id;
+    ```
+    ```
+        +-----------------------+------------------+
+        | Total en reparaciones | Vehiculo         |
+        +-----------------------+------------------+
+        |         200000.000000 | Corolla [ABC123] |
+        |         250000.000000 | Civic [DEF456]   |
+        |         150000.000000 | Fiesta [GHI789]  |
+        |         300000.000000 | Spark [JKL012]   |
+        |         200000.000000 | Accent [MNO345]  |
+        |         150000.000000 | Polo [PQR678]    |
+        |         200000.000000 | Versa [STU901]   |
+        |         250000.000000 | Clio [VWX234]    |
+        +-----------------------+------------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion* y *vehiculo*, luego agrupo por vehiculo y saco un promedio de las reparaciones para cada vehiculo.
+
+1. Obtener el inventario de piezas por proveedor
+    ```sql
+        SELECT PRO.proveedor AS 'Proveedor', RP.repuesto AS 'Repuesto', IV.cantidad AS 'Existencias'
+        FROM inventario AS IV
+        INNER JOIN repuesto AS RP ON IV.repuesto_id = RP.id_repuesto
+        INNER JOIN proveedor AS PRO ON RP.proveedor_id = PRO.id_proveedor
+        WHERE PRO.id_proveedor = 1;
+
+    ```
+    ```
+        +-------------+----------+-------------+
+        | Proveedor   | Repuesto | Existencias |
+        +-------------+----------+-------------+
+        | Proveedor A | Batería  |          10 |
+        +-------------+----------+-------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *inventario*, *repuesto* y *proveedor*, luego agarro los datos que necesito de cada entidad y filtro por *id_proveedor*.
+
+1. Listar los clientes que no han realizado reparaciones en el último año.
+    ```sql
+        SELECT CONCAT(CL.nombre, ' ', CL.apellido) AS 'Cliente', CL.id_cliente AS clienteID
+        FROM reparacion AS RE
+        INNER JOIN vehiculo AS VH ON RE.vehiculo_id = VH.id_vehiculo
+        INNER JOIN cliente AS CL ON VH.cliente_id = CL.id_cliente
+        WHERE YEAR(RE.fecha) <> '2024';
+    ```
+    ```
+        +-------------------+-----------+
+        | Cliente           | clienteID |
+        +-------------------+-----------+
+        | Juan García       |         1 |
+        | María López       |         2 |
+        | Pedro Martínez    |         3 |
+        | Luis González     |         5 |
+        | Laura Pérez       |         6 |
+        | Carlos Rodríguez  |         7 |
+        +-------------------+-----------+
+    ```
+    **Explicaciòn:** En mi base de datos no hay relacion directa entre reparacion y cliente, por lo tanto relaciono las entidades *reparacion*, *vehiculo* y *cliente* y filtro por fecha de reparacion.
+
+1. Obtener las ganancias totales del taller en un período específico.
+    ```sql
+        SELECT SUM(total) AS 'Ganancias [2018-2021]'
+        FROM factura
+        WHERE fecha BETWEEN '2018-01-01' AND '2021-01-01';
+    ```
+    ```
+        +-----------------------+
+        | Ganancias [2018-2021] |
+        +-----------------------+
+        |             500000.00 |
+        +-----------------------+
+    ```
+    **Explicaciòn:** Recorro la entidad *factura* en un rango de fecha, luego sumo el campo *total* de los registros.
+
+1. Listar los empleados y el total de horas trabajadas en reparaciones en un período específico (asumiendo que se registra la duración de cada reparación).
+    ```sql
+        SELECT CONCAT(EMP.nombre, ' ', EMP.apellido) AS 'Empleado', SUM(RE.horas) AS 'horasTotales'
+        FROM reparacion AS RE
+        INNER JOIN empleado AS EMP ON RE.empleado_id = EMP.id_empleado
+        WHERE RE.fecha BETWEEN '2018-01-01' AND '2024-01-01'
+        GROUP BY RE.empleado_id; 
+    ```
+    ```
+        +-----------------+--------------+
+        | Empleado        | horasTotales |
+        +-----------------+--------------+
+        | Juan Pérez      |            7 |
+        | María López     |            9 |
+        | Pedro González  |            3 |
+        | Luis Sánchez    |            4 |
+        +-----------------+--------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion* y *empleado* luego agrupo por empleado y sumo el campo *horas*.
+
+1. Obtener el listado de servicios prestados por cada empleado en un período específico.
+    ```sql
+        SELECT CONCAT(EMP.nombre, ' ', EMP.apellido) AS 'Empleado', SE.servicio AS 'Servicio'
+        FROM reparacion AS RE
+        INNER JOIN empleado AS EMP ON RE.empleado_id = EMP.id_empleado
+        INNER JOIN servicio AS SE ON RE.servicio_id = SE.id_servicio
+        WHERE RE.fecha BETWEEN '2018-01-01' AND '2024-01-01';
+    ```
+    ```
+        +-----------------+---------------------+
+        | Empleado        | Servicio            |
+        +-----------------+---------------------+
+        | Juan Pérez      | Cambio de Aceite    |
+        | María López     | Revisión de Frenos  |
+        | Pedro González  | Cambio de Batería   |
+        | Luis Sánchez    | Lavado y Encerado   |
+        | Juan Pérez      | Cambio de Aceite    |
+        | María López     | Revisión de Frenos  |
+        +-----------------+---------------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion*, *empleado* y *servicio*, filtro una fecha en especifico de reparaciones y extraigo los datos necesarios de cada entidad.
+
+## Subconsultas
+1. Obtener el cliente que ha gastado más en reparaciones durante el último año.
+    ```sql
+        SELECT CONCAT(CL.nombre, ' ', CL.apellido) AS 'Cliente'
+        FROM cliente AS CL
+        WHERE CL.id_cliente = (
+            SELECT VH.cliente_id
+            FROM reparacion AS RE
+            INNER JOIN vehiculo AS VH ON RE.vehiculo_id = VH.id_vehiculo
+            WHERE YEAR(RE.fecha) = '2024'
+            GROUP BY RE.vehiculo_id
+            ORDER BY SUM(RE.costo_total) desc
+            limit 1
+        );
+
+    ```
+    ```
+        +--------------+
+        | Cliente      |
+        +--------------+
+        | Ana Sánchez  |
+        +--------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion* y *vehiculo*, filtro por año y agrupo por vehiculo, luego ordenando la agrupacion por la sumatoria de las reparaciones para cada vehiculo y limito a 1 registros la subconsulta que luego uso en la clausera del where de la consulta externa.
+
+1. Obtener la pieza más utilizada en reparaciones durante el último mes
+    ```sql
+        SELECT RP.repuesto AS 'Repuesto mas usado'
+        FROM repuesto AS RP
+        WHERE RP.id_repuesto = (
+            SELECT  PR.repuesto_id
+            FROM reparacion AS RE
+            INNER JOIN pieza_reparacion AS PR ON RE.id_reparacion = PR.reparacion_id
+            WHERE MONTH(RE.fecha) = '06'
+            GROUP BY PR.repuesto_id
+            ORDER BY SUM(PR.cantidad) desc
+            limit 1
+        );
+    ```
+    ```
+        +--------------------+
+        | Repuesto mas usado |
+        +--------------------+
+        | Batería            |
+        +--------------------+
+    ```
+    **Explicaciòn:** Relaciono las entidades *reparacion* y *pieza_reparacion*, filtro por mes y agrupo por repuesto, luego ordenando la agrupacion por la sumatoria de la sumatoria de la cantidad del repuesto y limito a 1 registros la subconsulta que luego uso en la clausera del where de la consulta externa.
+
+1. Obtener los proveedores que suministran las piezas más caras
+    ```sql
+        SELECT PRO.id_proveedor AS 'idProveedor', PRO.proveedor AS 'Proveedor'
+        FROM proveedor AS PRO
+        WHERE PRO.id_proveedor IN (
+            SELECT BB.proveedor_id
+            FROM (
+                SELECT RP.proveedor_id
+                FROM repuesto AS RP
+                ORDER BY RP.precio desc
+                LIMIT 3
+            ) AS BB
+        );
+
+    ```
+    ```
+        +-------------+-------------+
+        | idProveedor | Proveedor   |
+        +-------------+-------------+
+        |           1 | Proveedor A |
+        |           3 | Proveedor C |
+        |           4 | Proveedor D |
+        +-------------+-------------+
+    ```
+    **Explicaciòn:** Con la subconsulta tomo los 3 repuestos mas caros y me retorna los *proveedor_id* de estos repuestos que luego son comparados con la clausula *IN* de la consulta externa.
+
+1. Obtener los proveedores que suministran las piezas más caras
+    ```sql
+
+    ```
+    ```
+
+    ```
+    **Explicaciòn:** 
+
+
+
+
+
+
+       
