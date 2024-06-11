@@ -556,7 +556,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     **Explicaciòn:** Creo el procedimiento recibiendo como parametros de entrada el id del repuesto, la cantidad o la ubicacion nueva para luego inyectarlos en su correspondiente registro.
 
 
-1. Crear un procedimiento almacenado para eliminar una cita
+1. Crear un procedimiento almacenado para eliminar una cita.
     ```sql
         DELIMITER $$
         CREATE PROCEDURE eliminar_cita(
@@ -586,3 +586,31 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
         1 row in set (0,00 sec)
     ```
     **Explicaciòn:** Creo un procedimiento recibiendo como parametro de entrada el id de la cita, luego confirmo la eliminacion con el condicional IF.
+
+1. Crear un procedimiento almacenado para generar una factura.
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE eliminar_cita(
+            IN fecha DATE,
+            IN total DECIMAL(10,2),
+            IN cliente_id INT
+        )
+        BEGIN
+            INSERT INTO factura (fecha,total,cliente_id)
+            VALUES (fecha,total,cliente_id)
+            -- verificar modificacion
+            IF ROW_COUNT() > 0 THEN
+            SET mensaje = 'La factura se ha generado correctamente';
+            ELSE
+            SET mensaje = 'Error al generar factura';
+            END IF;
+            SELECT mensaje AS 'Mensaje';
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+
+    ```
+    **Explicaciòn:** 
+
