@@ -129,12 +129,12 @@ INSERT INTO ubicacion (zona, descripcion) VALUES
 ('Zona 5', 'Descripción de la zona 5'),
 ('Zona 6', 'Descripción de la zona 6');
 
-INSERT INTO inventario (cantidad, repuesto_id, ubicacion_id) VALUES 
-(10, 1, 1), -- 10 unidades del repuesto con ID 1 en la ubicación con ID 1
-(20, 2, 2), -- 20 unidades del repuesto con ID 2 en la ubicación con ID 2
-(15, 3, 3), -- 15 unidades del repuesto con ID 3 en la ubicación con ID 3
-(25, 4, 4), -- 25 unidades del repuesto con ID 4 en la ubicación con ID 4
-(30, 5, 5); -- 30 unidades del repuesto con ID 5 en la ubicación con ID 5
+INSERT INTO inventario (cantidad, repuesto_id, ubicacion_id, stock_inicial) VALUES 
+(10, 1, 1,5), -- 10 unidades del repuesto con ID 1 en la ubicación con ID 1
+(20, 2, 2,300), -- 20 unidades del repuesto con ID 2 en la ubicación con ID 2
+(15, 3, 3,10), -- 15 unidades del repuesto con ID 3 en la ubicación con ID 3
+(25, 4, 4,100), -- 25 unidades del repuesto con ID 4 en la ubicación con ID 4
+(30, 5, 5, 23); -- 30 unidades del repuesto con ID 5 en la ubicación con ID 5
 
 INSERT INTO empresa (empresa, ciudad, direccion, contacto) VALUES 
 ('tallerING S.A.', 'Bucaramanga', 'Calle Ejemplo #123', 'Hader Cabrera');

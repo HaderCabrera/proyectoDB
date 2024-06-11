@@ -40,7 +40,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Recorro la entidad *reparacion* seleccionando las reparaciones del *empleado* con *id* "2" realizadas entre el 2019 y el 2022.
 
-1. Listar todos los clientes y los vehículos que poseen
+1. Listar todos los clientes y los vehículos que poseen.
     ```sql
         SELECT CONCAT(CL.nombre, ' ', CL.apellido) AS 'Cliente', CONCAT(VH.placa, ' ', VH.modelo) AS 'Vehiculo'
         FROM cliente AS CL
@@ -64,7 +64,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *cliente* y *vehiculo* y muestros datos de cada una de esas entidades para mostrar.
 
-1. Obtener la cantidad de piezas en inventario para cada pieza
+1. Obtener la cantidad de piezas en inventario para cada pieza.
     ```sql
         SELECT RE.repuesto AS 'Repuesto', IV.cantidad AS 'Cantidad'
         FROM inventario AS IV
@@ -84,7 +84,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *inventario* y *repuesto* y llamo datos de cada una de esas entidades para mostrar.
 
-1. Obtener las citas programadas para un día específico
+1. Obtener las citas programadas para un día específico.
     ```sql
         SELECT *
         FROM cita as C
@@ -99,7 +99,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Recorro la entidad *cita* y selecciono una fecha en espeficico, como el campo es DATETIME, lo formateo con *DATE()* para solo comparar la fecha.
 
-1. Obtener una factura para un cliente específico en una fecha determinada
+1. Obtener una factura para un cliente específico en una fecha determinada.
     ```sql
         SELECT *
         FROM factura AS F
@@ -115,7 +115,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Recorro la entidad *factura* y selecciono una fecha en espeficico para el cliente con *id* = 4.
 
-1. Listar todas las órdenes de compra y sus detalles
+1. Listar todas las órdenes de compra y sus detalles.
     ```sql
         SELECT OC.id_orden AS 'compraID', OD.empleado_id AS 'Empleado', OD.proveedor_id AS 'Proveedor', OD.repuesto_id AS 'Repuesto', OD.cantidad AS 'Cantidad', OD.precio AS 'valor'
         FROM orden_compra AS OC
@@ -140,7 +140,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *orden_compra* y *orden_detalle* y extraigo los datos que necesito de cada tabla.
 
-1. Obtener el costo total de piezas utilizadas en una reparación específica
+1. Obtener el costo total de piezas utilizadas en una reparación específica.
     ```sql
         SELECT PR.reparacion_id AS 'reparacionID',
             SUM(RR.precio * PR.cantidad) AS 'valor'
@@ -159,7 +159,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relacion las entidades *pieza_reparacion* y *repuesto* poniendo como restriccion un reparacion en especifico, despues hago un *GROUP BY* de esta reparacion y calculo el valor total multiplicando cada pieza por su valor y cantidad.
 
-1. Obtener el inventario de piezas que necesitan ser reabastecidas (cantidad menor que un umbral)
+1. Obtener el inventario de piezas que necesitan ser reabastecidas (cantidad menor que un umbral).
     ```sql
         SELECT *
         FROM inventario as IV
@@ -176,7 +176,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     **Explicaciòn:** Recorro toda la entidad *inventario* buscando los repuestos que tienen menos de 15 existencias.
 
 
-1. Obtener la lista de servicios más solicitados en un período específico
+1. Obtener la lista de servicios más solicitados en un período específico.
     ```sql
         SELECT SE.servicio AS 'Servicio', SUM(id_servicio) AS 'Cantidad'
         FROM reparacion AS RE
@@ -194,7 +194,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     **Explicaciòn:** Relaciono las entidades *reparacion* y *servicio* luego hago un *GROUP BY* por cada servicio y extraigo la cantidad de servicios en una determinada fecha.
 
 
-1. Obtener el costo total de reparaciones para cada cliente en un período específico
+1. Obtener el costo total de reparaciones para cada cliente en un período específico.
     ```sql
         SELECT CL.nombre AS 'Cliente', SUM(RE.costo_total) AS 'Total en reparaciones [COP]'
         FROM reparacion AS RE
@@ -218,7 +218,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** En mi base de datos no tengo relacion directa entre *reparacion* y *cliente* por lo tanto hago dos *JOIN*, luego de tener las reparaciones de los clientes agrupo por cliente y hago una suma total para cada cliente.
 
-1. Listar los empleados con mayor cantidad de reparaciones realizadas en un período específico
+1. Listar los empleados con mayor cantidad de reparaciones realizadas en un período específico.
     ```sql
         SELECT CONCAT(EP.nombre, ' ', EP.apellido) AS 'Empleado', SUM(id_empleado) AS 'Reparaciones'
         FROM reparacion AS RE
@@ -238,7 +238,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entiedades *reparacion* y *empleado* y extraigo los registros de un periodo en especifico, luego agrupo por empleado y sumo la cantidad de reparaciones por empleado.
 
-1. Obtener las piezas más utilizadas en reparaciones durante un período específico
+1. Obtener las piezas más utilizadas en reparaciones durante un período específico.
     ```sql
         SELECT PR.reparacion_id AS Reparacion, RP.repuesto AS Repuesto, SUM(PR.cantidad) AS 'Cantidad'
         FROM reparacion AS RE
@@ -261,7 +261,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *reparacion* ,*pieza_reparacion* y *repuesto* seleccionando las reparaciones en un periodo en especifico. Luego agrupo por *pieza_reparacion*, y saco la sumatoria total para cada pieza para luego ordenarla desc.
 
-1. Calcular el promedio de costo de reparaciones por vehículo
+1. Calcular el promedio de costo de reparaciones por vehículo.
     ```sql
         SELECT AVG(RE.costo_total) AS 'Total en reparaciones', CONCAT(VH.modelo, ' ' , '[',VH.placa, ']') AS 'Vehiculo'
         FROM reparacion AS RE
@@ -284,7 +284,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *reparacion* y *vehiculo*, luego agrupo por vehiculo y saco un promedio de las reparaciones para cada vehiculo.
 
-1. Obtener el inventario de piezas por proveedor
+1. Obtener el inventario de piezas por proveedor.
     ```sql
         SELECT PRO.proveedor AS 'Proveedor', RP.repuesto AS 'Repuesto', IV.cantidad AS 'Existencias'
         FROM inventario AS IV
@@ -406,7 +406,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *reparacion* y *vehiculo*, filtro por año y agrupo por vehiculo, luego ordenando la agrupacion por la sumatoria de las reparaciones para cada vehiculo y limito a 1 registros la subconsulta que luego uso en la clausera del where de la consulta externa.
 
-1. Obtener la pieza más utilizada en reparaciones durante el último mes
+1. Obtener la pieza más utilizada en reparaciones durante el último mes.
     ```sql
         SELECT RP.repuesto AS 'Repuesto mas usado'
         FROM repuesto AS RP
@@ -429,7 +429,7 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Relaciono las entidades *reparacion* y *pieza_reparacion*, filtro por mes y agrupo por repuesto, luego ordenando la agrupacion por la sumatoria de la sumatoria de la cantidad del repuesto y limito a 1 registros la subconsulta que luego uso en la clausera del where de la consulta externa.
 
-1. Obtener los proveedores que suministran las piezas más caras
+1. Obtener los proveedores que suministran las piezas más caras.
     ```sql
         SELECT PRO.id_proveedor AS 'idProveedor', PRO.proveedor AS 'Proveedor'
         FROM proveedor AS PRO
@@ -455,18 +455,134 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     **Explicaciòn:** Con la subconsulta tomo los 3 repuestos mas caros y me retorna los *proveedor_id* de estos repuestos que luego son comparados con la clausula *IN* de la consulta externa.
 
-1. Obtener los proveedores que suministran las piezas más caras
+1. Listar las reparaciones que no utilizaron piezas específicas durante el último año.
     ```sql
+        SELECT *
+        FROM reparacion AS RE
+        WHERE RE.id_reparacion NOT IN (
+            SELECT PR.reparacion_id
+            FROM pieza_reparacion AS PR
+            WHERE PR.repuesto_id = '5' OR PR.repuesto_id = '1'
+        );
 
     ```
     ```
-
+        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
+        | id_reparacion | fecha      | horas | costo_total | descripcion                        | vehiculo_id | empleado_id | servicio_id |
+        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
+        |             2 | 2019-06-02 |     5 |   250000.00 | Reparación de frenos               |           2 |           2 |           3 |
+        |             5 | 2023-06-05 |     4 |   200000.00 | Reparación de la transmisión       |           5 |           5 |           5 |
+        |             7 | 2020-06-07 |     4 |   200000.00 | Reparación del sistema eléctrico   |           7 |           2 |           3 |
+        |             8 | 2024-06-08 |     5 |   250000.00 | Reparación de la suspensión        |           8 |           3 |           4 |
+        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
     ```
-    **Explicaciòn:** 
+    **Explicaciòn:** Realizo la subconsulta en el *WHERE* externo para que me retorne las *reparaciones_id* que usan los repuestos *5-1*, luego en la consulta externa listo las reparaciones excluyendo las de la subconsulta.
 
 
+1. Obtener las piezas que están en inventario por debajo del 10% del stock inicial.
+    ```sql
+    SELECT RP.repuesto
+    FROM repuesto AS RP
+    WHERE RP.id_repuesto IN (
+        SELECT repuesto_id
+        FROM inventario
+        WHERE  cantidad < (stock_inicial * 0.1) 
+    );
+    ```
+    ```
+        +------------------+
+        | repuesto         |
+        +------------------+
+        | Filtro de Aceite |
+        +------------------+
+    ```
+    **Explicaciòn:** Realizo una subconsulta que me retorna el *id_repuesto* de los repuesto que tienen menos del 10% de su existencia inicial, los cuales comparo con la consulta externa de la entidad *repuesto* y selecciono los datos que necesito.
+    
+## Procedimientos Almacenados.
+
+1. Crear un procedimiento almacenado para insertar una nueva reparación.
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE insertar_reparacion(
+            IN p_fecha DATE,
+            IN p_horas TINYINT(3),
+            IN p_costo_total DECIMAL(10,2),
+            IN p_descripcion TEXT,
+            IN p_vehiculo_id INT,
+            IN p_empleado_id INT,
+            IN p_servicio_id INT)
+        BEGIN
+            INSERT INTO reparacion (fecha, horas, costo_total, descripcion, vehiculo_id, empleado_id, servicio_id) 
+            VALUES (p_fecha, p_horas, p_costo_total, p_descripcion, p_vehiculo_id, p_empleado_id, p_servicio_id);
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        -- Llamado el procedimiento.
+        CALL insertar_reparacion('2021-05-06', 4, 203500, 'Reparación del motor', 1, 1, 4);
+        Query OK, 1 row affected (0,00 sec)
+    ```
+    **Explicaciòn:** Creo el procedimiento recibiendo como parametros de entrada los campos de la entidad *reparacion*.
 
 
+1. Crear un procedimiento almacenado para actualizar el inventario de una pieza.
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE actualizar_inventario(
+            IN repuesto INT,
+            IN cantidad TINYINT(3),
+            IN ubicacion INT
+        )
+        BEGIN
+            DECLARE mensaje VARCHAR(100);
+            UPDATE inventario
+            SET cantidad = cantidad, ubicacion_id = ubicacion
+            WHERE repuesto_id = repuesto;
+            -- verificar modificacion
+            IF ROW_COUNT() > 0 THEN
+            SET mensaje = 'El registro se ha creado correctamente.';
+            ELSE
+            SET mensaje = 'Error al crear el registro.';
+            END IF;
+            SELECT mensaje AS 'Mensaje';
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        -- Llamado el procedimiento.
+        CALL actualizar_inventario (5, 31, 5);
+        Query OK, 1 row affected (0,01 sec)
+    ```
+    **Explicaciòn:** Creo el procedimiento recibiendo como parametros de entrada el id del repuesto, la cantidad o la ubicacion nueva para luego inyectarlos en su correspondiente registro.
 
 
-       
+1. Crear un procedimiento almacenado para eliminar una cita
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE eliminar_cita(
+            IN cita_id INT
+        )
+        BEGIN
+            DECLARE mensaje VARCHAR(100);
+            DELETE FROM cita WHERE id_cita = cita_id;
+            -- verificar modificacion
+            IF ROW_COUNT() > 0 THEN
+            SET mensaje = 'La cita se ha eliminado con exito';
+            ELSE
+            SET mensaje = 'Error al eliminar cita';
+            END IF;
+            SELECT mensaje AS 'Mensaje';
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL eliminar_cita(1);
+        +-----------------------------------+
+        | Mensaje                           |
+        +-----------------------------------+
+        | La cita se ha eliminado con exito |
+        +-----------------------------------+
+        1 row in set (0,00 sec)
+    ```
+    **Explicaciòn:** Creo un procedimiento recibiendo como parametro de entrada el id de la cita, luego confirmo la eliminacion con el condicional IF.

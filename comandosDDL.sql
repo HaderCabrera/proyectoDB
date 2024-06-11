@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS inventario(
 	cantidad TINYINT(3) NOT NULL,
 	repuesto_id INT NOT NULL,
 	ubicacion_id INT NOT NULL,
+	stock_inicial INT NOT NULL,
 	CONSTRAINT PK_id_inventario PRIMARY KEY(id_inventario),
 	CONSTRAINT FK_repuesto_inventario FOREIGN KEY (repuesto_id) REFERENCES repuesto(id_repuesto),
 	CONSTRAINT FK_ubicacion_inventario FOREIGN KEY(ubicacion_id) REFERENCES ubicacion(id_ubicacion)
