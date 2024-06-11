@@ -25,18 +25,16 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
 
 1. Calcular el costo total de todas las reparaciones realizadas por un empleado específico en un período de tiempo.
     ```sql
-        SELECT *
+        SELECT RE.empleado_id AS 'empleadoID', SUM(RE.costo_total) AS 'Total en reparaciones'
         FROM reparacion as RE
         WHERE RE.empleado_id = 2 AND fecha BETWEEN '2019-01-01' AND '2022-01-01'; 
     ```
     ```
-        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
-        | id_reparacion | fecha      | horas | costo_total | descripcion                        | vehiculo_id | empleado_id | servicio_id |
-        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
-        |             2 | 2019-06-02 |     5 |   250000.00 | Reparación de frenos               |           2 |           2 |           3 |
-        |             7 | 2020-06-07 |     4 |   200000.00 | Reparación del sistema eléctrico   |           7 |           2 |           3 |
-        +---------------+------------+-------+-------------+------------------------------------+-------------+-------------+-------------+
-
+        +------------+-----------------------+
+        | empleadoID | Total en reparaciones |
+        +------------+-----------------------+
+        |          2 |             450000.00 |
+        +------------+-----------------------+
     ```
     **Explicaciòn:** Recorro la entidad *reparacion* seleccionando las reparaciones del *empleado* con *id* "2" realizadas entre el 2019 y el 2022.
 
@@ -596,8 +594,9 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
             IN cliente_id INT
         )
         BEGIN
+            DECLARE mensaje VARCHAR(255);
             INSERT INTO factura (fecha,total,cliente_id)
-            VALUES (fecha,total,cliente_id)
+            VALUES (fecha,total,cliente_id);
             -- verificar modificacion
             IF ROW_COUNT() > 0 THEN
             SET mensaje = 'La factura se ha generado correctamente';
@@ -610,7 +609,136 @@ la información de clientes, vehículos, servicios, reparaciones, empleados, pro
     ```
     ```
         --Llamado al procedimiento
-
+        CALL eliminar_cita('2024-06-11',185000.00, 2);
     ```
     **Explicaciòn:** 
 
+1. Crear un procedimiento almacenado para obtener el historial de reparaciones de un vehículo
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE reparaciones_vehiculo(
+            IN id_vehiculo INT
+        )
+        BEGIN
+            SELECT *
+            from reparacion as RE
+            WHERE RE.vehiculo_id = id_vehiculo;
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL reparaciones_vehiculo(1);
+    ```
+    **Explicaciòn:** Creo un procedimiento y recibo como parametro de entrada el *id* del vehiculo el cual uso para consultar su historial de reparaciones.
+
+
+
+1. Crear un procedimiento almacenado para calcular el costo total de reparaciones de un cliente en un período.
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE total_reparaciones_cliente(
+            IN id_cliente INT,
+            IN fecha_inicio DATE,
+            IN fecha_fin DATE
+        )
+        BEGIN
+            SELECT SUM(total) AS 'Total en reparaciones'
+            FROM factura
+            WHERE cliente_id = id_cliente AND fecha BETWEEN fecha_inicio AND fecha_fin;
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL total_reparaciones_cliente(1,'2000-01-01','2024-01-01');
+    ```
+    **Explicaciòn:** Creo un procedimiento recibiendo como parametros de entrada el *id_cliente*, *fecha_inicio* y *fecha_fin* para filtrar en la entidad *factura* con esos datos.
+
+1. Crear un procedimiento almacenado para obtener la lista de vehículos que requieren mantenimiento basado en el kilometraje.
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE mantenimiento_kilometraje(
+            IN km_critico DOUBLE
+        )
+        BEGIN
+            SELECT *
+            FROM vehiculo
+            WHERE kilometraje > km_critico;
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL mantenimiento_kilometraje(80000);
+    ```
+    **Explicaciòn:** Creo el procedimiento recibiendo como parametro de entrada el *kilometraje* de mantenimiento de un vehiculo para ponerlo como condicion en la entidad *vehiculo* .
+
+1. Crear un procedimiento almacenado para insertar una nueva orden de compra
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE insertar_orden_compra(
+            IN cantidad DECIMAL(10,2),
+            IN empleado INT,
+            IN proveedor INT 
+        )
+        BEGIN
+            INSERT INTO orden_compra(total,empleado_id, proveedor_id)
+            VALUES (cantidad, empleado, proveedor);
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL insertar_orden_compra(150000, 4, 4);
+    ```
+    **Explicaciòn:** Creo el procedimiento recibiendo como parametro de entrada los campos de la entidad *orden_compra*  para ponerlo como parametros en el INSERT.
+
+
+
+1. Crear un procedimiento almacenado para actualizar los datos de un cliente
+    ```sql
+        DELIMITER $$
+        CREATE PROCEDURE actualizar_cliente(
+            IN cliente INT,
+            IN nombre_n VARCHAR(45),
+            IN apellido_n VARCHAR(45),
+            IN direccion_n VARCHAR(45),
+            IN email_n VARCHAR(45)
+        )
+        BEGIN
+            UPDATE cliente
+            SET nombre = nombre_n, apellido = apellido_n, direccion = direccion_n, email = email_n 
+            WHERE id_cliente = cliente;
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL actualizar_cliente(1,'Juana','Garcio','Calle 000', 'jjj.jjj@jjj.jom');
+    ```
+    **Explicaciòn:** Creo el procedimiento recibiendo como parametro de entrada los campos de la entidad *cliente*  para ponerlo como parametros del *UPDATE*.
+
+1. Crear un procedimiento almacenado para obtener los servicios más solicitados en un período
+    ```sql
+        DROP PROCEDURE IF EXISTS listar_servicios_recurrentes;
+        DELIMITER $$
+        CREATE PROCEDURE listar_servicios_recurrentes(
+            IN fecha_inicio DATE,
+            IN fecha_fin DATE
+        )
+        BEGIN
+            SELECT SE.servicio , SUM(SE.id_servicio) AS 'Cantidad'
+            FROM reparacion AS RE
+            INNER JOIN servicio AS SE ON RE.servicio_id = SE.id_servicio
+            WHERE RE.fecha BETWEEN fecha_inicio AND fecha_fin
+            GROUP BY SE.id_servicio
+            ORDER BY Cantidad DESC;
+        END $$
+        DELIMITER ;
+    ```
+    ```
+        --Llamado al procedimiento
+        CALL listar_servicios_recurrentes('2020-01-01','2022-01-01');
+    ```
+    **Explicaciòn:** 
